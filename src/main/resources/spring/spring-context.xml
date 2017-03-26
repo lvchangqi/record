@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context" xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd">
+
+    <!-- scanner all annotations exclude '@Controller'-->
+    <context:component-scan base-package="org.andios" use-default-filters="true">
+        <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:exclude-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+    <!-- load the properties of 'DB'-->
+    <context:property-placeholder location="classpath:properties/db.properties"/>
+    <!-- configuration of druid's dataSource-->
+    <bean id="dataSource" class="com.alibaba.druid.pool.DruidDataSource" init-method="init"
+          destroy-method="close">
+        <property name="url" value="${druid.url}"/>
+        <property name="driverClassName" value="${druid.driver}"/>
+        <property name="username" value="${druid.username}"/>
+        <property name="password" value="${druid.password}"/>
+
+        <property name="filters" value="${druid.filters}" />
+        <property name="connectionProperties"
+                  value="config.decrypt=true;config.decrypt.key=${druid.publickey}"/>
+        
+        <property name="initialSize" value="${druid.init}"/>
+        <property name="maxActive" value="${druid.maxActive}"/>
+        <property name="maxWait" value="${druid.maxWait}"/>
+        <property name="timeBetweenEvictionRunsMillis" value="${druid.timeBetween}"/>
+    </bean>
+
+    <!-- configuration of sessionFactory-->
+    <bean id="sessionFactory"
+          class="org.springframework.orm.hibernate5.LocalSessionFactoryBean"
+          destroy-method="destroy">
+        <property name="dataSource" ref="dataSource"/>
+        <property name="packagesToScan" value="org.andios.pojo"/>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
+                <!--已经在log4j中配置-->
+                <!--<prop key="hibernate.show_sql">true</prop>-->
+            </props>
+        </property>
+    </bean>
+
+    <!-- mysql transaction manager-->
+    <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <!-- transaction manager annotations open-->
+    <tx:annotation-driven transaction-manager="transactionManager"/>
+    <!-- transaction properties read(查) create(增) delete(删) update(改)-->
+    <tx:advice id="interceptor" transaction-manager="transactionManager">
+        <tx:attributes>
+            <tx:method name="read*" read-only="true"/>
+            <tx:method name="create*" rollback-for="java.lang.Exception"/>
+            <tx:method name="delete*" rollback-for="java.lang.Exception"/>
+            <tx:method name="update*" rollback-for="java.lang.Exception"/>
+            <tx:method name="*"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- configuration of aop-->
+    <aop:config>
+        <!-- pointcut-->
+        <aop:pointcut id="point" expression="execution(* org.andios.serviceI.*.*(..))"/>
+        <!-- bind transaction to pointcut-->
+        <aop:advisor advice-ref="interceptor" pointcut-ref="point"/>
+    </aop:config>
+
+    <!-- druid监控spring-->
+    <bean id="druid-stat-interceptor" class="com.alibaba.druid.support.spring.stat.DruidStatInterceptor" />
+    <bean id="druid-stat-pointcut" class="org.springframework.aop.support.JdkRegexpMethodPointcut" scope="prototype" >
+        <property name="patterns" value="org.andios.service.*"/>
+    </bean >
+    <aop:config proxy-target-class="true" >
+        <aop:advisor pointcut-ref="druid-stat-pointcut" advice-ref="druid-stat-interceptor" />
+    </aop:config >
+
+    <import resource="classpath:spring/spring-task.xml"/>
+</beans>

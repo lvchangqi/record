@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
+
+    <!--only scanner for annotations include '@Controller'-->
+    <context:component-scan base-package="org.andios.controller" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.ControllerAdvice"/>
+        <context:include-filter type="annotation" expression="org.springframework.web.bind.annotation.RestController"/>
+    </context:component-scan>
+
+    <!-- Router-->
+    <!--<mvc:view-controller/>-->
+
+    <!-- mvc annotations open-->
+    <mvc:annotation-driven/>
+
+    <!-- static resources with default servlet-->
+    <mvc:default-servlet-handler/>
+    <!-- view parser-->
+    <mvc:view-resolvers>
+        <mvc:jsp prefix="/view/" suffix=".jsp"/>
+    </mvc:view-resolvers>
+
+    <!-- fileupload-->
+    <bean class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+        <property name="defaultEncoding" value="UTF-8"/>
+        <property name="maxUploadSize" value="31457280"/>
+        <property name="uploadTempDir" value="/WEB-INF/tmp"/>
+    </bean>
+</beans>
