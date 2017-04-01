@@ -41,6 +41,8 @@
         <property name="hibernateProperties">
             <props>
                 <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.connection.url">jdbc:mysql://localhost:3306/record</prop>
+                <prop key="hibernate.connection.driver_class">com.mysql.jdbc.Driver</prop>
                 <!--<prop key="hibernate.hbm2ddl.auto">update</prop>-->
                 <!--已经在log4j中配置-->
                 <!--<prop key="hibernate.show_sql">true</prop>-->
@@ -52,6 +54,9 @@
     <bean id="transactionManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
         <property name="sessionFactory" ref="sessionFactory"/>
     </bean>
+
+    <!-- register bean for translating hibernate exception to spring exception-->
+    <bean class="org.springframework.dao.annotation.PersistenceExceptionTranslationPostProcessor"/>
 
     <!-- transaction manager annotations open-->
     <tx:annotation-driven transaction-manager="transactionManager"/>
@@ -68,7 +73,7 @@
     <!-- configuration of aop-->
     <aop:config>
         <!-- pointcut-->
-        <aop:pointcut id="point" expression="execution(* org.andios.serviceI.*.*(..))"/>
+        <aop:pointcut id="point" expression="execution(* org.andios.dao.*.*(..))"/>
         <!-- bind transaction to pointcut-->
         <aop:advisor advice-ref="interceptor" pointcut-ref="point"/>
     </aop:config>
@@ -82,5 +87,6 @@
         <aop:advisor pointcut-ref="druid-stat-pointcut" advice-ref="druid-stat-interceptor" />
     </aop:config >
 
+    <import resource="classpath:spring/spring-shiro.xml"/>
     <import resource="classpath:spring/spring-task.xml"/>
 </beans>

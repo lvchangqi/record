@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
+
+    <!-- shiro生命周期由spring代理-->
+    <bean class="org.apache.shiro.spring.LifecycleBeanPostProcessor"/>
+
+    <!-- 缓存用户授权记录-->
+    <bean id="cacheManager" class="org.apache.shiro.cache.MemoryConstrainedCacheManager"/>
+
+    <!-- cookie生成(默认AES加密)-->
+    <bean id="cookie" class="org.apache.shiro.web.servlet.SimpleCookie">
+        <!-- cookie过期时间(-1:关闭服务器立刻过期) seconds-->
+        <property name="maxAge" value="600"/>
+        <property name="name" value="login"/>
+    </bean>
+
+    <!-- cookie管理器-->
+    <bean id="rememberMeManager" class="org.apache.shiro.web.mgt.CookieRememberMeManager">
+        <property name="cookie" ref="cookie"/>
+    </bean>
+    
+    <!-- 从数据库授权-->
+    <bean id="jdbcRealm" class="org.apache.shiro.realm.jdbc.JdbcRealm">
+        <property name="credentialsMatcher">
+            <bean class="org.apache.shiro.authc.credential.Md5CredentialsMatcher"/>
+        </property>
+        <property name="dataSource" ref="dataSource"/>
+        <property name="saltStyle" value="NO_SALT"/>
+        <property name="userRolesQuery" value="select role from users where username = ?"/>
+    </bean>
+
+    <!-- shiro核心安全管理器-->
+    <bean id="securityManager" class="org.apache.shiro.web.mgt.DefaultWebSecurityManager">
+        <property name="realm" ref="jdbcRealm"/>
+        <property name="rememberMeManager" ref="rememberMeManager"/>
+        <property name="cacheManager" ref="cacheManager"/>
+    </bean>
+
+    <!-- shiro拦截链-->
+    <bean id="shiro" class="org.apache.shiro.spring.web.ShiroFilterFactoryBean">
+        <property name="securityManager" ref="securityManager"/>
+        <property name="loginUrl" value="/index.jsp"/>
+        <property name="filterChainDefinitions">
+            <value>
+                <!-- shiro拦截链 {@link url(https://shiro.apache.org/web.html#Web-FilterChainDefinitions)}-->
+            </value>
+        </property>
+    </bean>
+</beans>

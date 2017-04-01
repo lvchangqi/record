@@ -17,9 +17,9 @@ dependencies {
 
     compile group: 'log4j', name: 'log4j', version: '1.2.17'
 
-    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.41'
-    compile group: 'net.sf.ehcache', name: 'ehcache', version: '2.10.3'
+//    compile group: 'net.sf.ehcache', name: 'ehcache', version: '2.10.3'
     compile group: 'com.alibaba', name: 'druid', version: '1.0.29'
+    compile group: 'mysql', name: 'mysql-connector-java', version: '5.1.41'
 
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.8.7'
     compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.8.7'
@@ -29,6 +29,11 @@ dependencies {
     compile group: 'aopalliance', name: 'aopalliance', version: '1.0'
 
     compile group: 'javax.servlet', name: 'javax.servlet-api', version: '3.1.0'
+    compile group: 'org.apache.shiro', name: 'shiro-core', version: '1.3.2'
+    compile group: 'org.apache.shiro', name: 'shiro-web', version: '1.3.2'
+    compile group: 'org.apache.shiro', name: 'shiro-spring', version: '1.3.2'
+//    compile group: 'org.apache.shiro', name: 'shiro-ehcache', version: '1.3.2'
+
 
     compile group: 'antlr', name: 'antlr', version: '2.7.7'
     compile group: 'org.hibernate.common', name: 'hibernate-commons-annotations', version: '5.0.1.Final'
